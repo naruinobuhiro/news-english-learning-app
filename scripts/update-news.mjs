@@ -11,6 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
 const GEMINI_MODEL = "gemini-2.0-flash";
+const MAX_RETRIES = 3;
+const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
 async function main() {
   console.log("🚀 ニュース更新プロセスを開始します...");
@@ -28,7 +30,9 @@ async function main() {
       archive = JSON.parse(fs.readFileSync(ARCHIVE_PATH, 'utf-8'));
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const jstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    const today = jstDate.toISOString().slice(0, 10);
     // すでに今日分があればスキップ（デバッグ時はコメントアウト）
     // if (archive.some(d => d.date === today)) {
     //   console.log(`✅ ${today} のデータは既に存在します。スキップします。`);
@@ -52,8 +56,29 @@ async function main() {
     console.log("🔄 Gemini API で英訳・学習コンテンツを生成中...");
     const translatedArticles = [];
     for (const article of selected) {
-      const translated = await translateArticle(article, apiKey);
-      translatedArticles.push(translated);
+      let retryCount = 0;
+      let translated = null;
+      
+      while (retryCount < MAX_RETRIES) {
+        try {
+          translated = await translateArticle(article, apiKey);
+          if (translated && translated.englishTitle && translated.englishBody) {
+            break;
+          }
+        } catch (e) {
+          console.warn(`⚠️ 翻訳リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, e.message);
+          retryCount++;
+          await sleep(Math.pow(2, retryCount) * 1000);
+        }
+      }
+
+      if (translated) {
+        translatedArticles.push(translated);
+      }
+    }
+    
+    if (translatedArticles.length === 0) {
+      throw new Error("有効な翻訳記事が1つも生成されませんでした。");
     }
 
     const dailyNews = {
@@ -121,10 +146,11 @@ async function translateArticle(article, apiKey) {
 出力形式（必ずJSONのみを返すこと）:
 {
   "englishTitle": "...",
-  "englishBody": "...",
+  "englishBody": "English text with paragraphs separated by \\n\\n",
   "footnotes": [{"expression": "...", "meaning": "...", "usage": "..."}],
   "vocabulary": [{"word": "...", "meaning": "...", "example": "...", "level": "..."}]
-}`;
+}
+Please ensure footnotes are useful for high school students and vocabulary covers levels from Eiken 2 to Pre-1.`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,

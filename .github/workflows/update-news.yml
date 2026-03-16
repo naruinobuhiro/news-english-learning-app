@@ -1,4 +1,4 @@
-name: Update News Hourly
+name: Update News and Deploy
 
 on:
   schedule:
@@ -6,11 +6,18 @@ on:
     - cron: '0 22 * * *'
   workflow_dispatch: # 手動実行用
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  update-news:
+  update-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
       
@@ -36,5 +43,20 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add public/data/archive.json
-          git commit -m "chore: auto update news [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: auto update news" || echo "No changes to commit"
           git push
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build with Next.js
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

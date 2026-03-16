@@ -13,6 +13,8 @@
 import type { FootnoteItem, NewsArticle, TranslatedArticle, VocabItem } from "@/types";
 
 const GEMINI_MODEL = "gemini-2.0-flash";
+const MAX_RETRIES = 3;
+const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 /** 単一ニュース記事を英訳・学習コンテンツ生成 */
 export async function translateArticle(
@@ -26,47 +28,54 @@ export async function translateArticle(
   }
 
   const prompt = buildPrompt(article);
+  let retryCount = 0;
+  let lastError: any = null;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.3,
-          responseMimeType: "application/json",
-        },
-      }),
+  while (retryCount < MAX_RETRIES) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.3,
+              responseMimeType: "application/json",
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Gemini API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      const parsed = JSON.parse(text);
+
+      return {
+        originalTitle: article.title,
+        originalLink: article.link,
+        englishTitle: parsed.englishTitle ?? "",
+        englishBody: parsed.englishBody ?? "",
+        footnotes: (parsed.footnotes ?? []) as FootnoteItem[],
+        vocabulary: (parsed.vocabulary ?? []) as VocabItem[],
+        pubDate: article.pubDate,
+        translatedAt: new Date().toISOString(),
+      };
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`⚠️ Gemini API リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, err.message);
+      retryCount++;
+      await sleep(Math.pow(2, retryCount) * 1000);
     }
-  );
-
-  if (!response.ok) {
-    console.error("Gemini API エラー:", response.status, await response.text());
-    return getMockTranslation(article);
   }
 
-  const data = await response.json();
-  const text: string =
-    data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-
-  try {
-    const parsed = JSON.parse(text);
-    return {
-      originalTitle: article.title,
-      originalLink: article.link,
-      englishTitle: parsed.englishTitle ?? "",
-      englishBody: parsed.englishBody ?? "",
-      footnotes: (parsed.footnotes ?? []) as FootnoteItem[],
-      vocabulary: (parsed.vocabulary ?? []) as VocabItem[],
-      pubDate: article.pubDate,
-      translatedAt: new Date().toISOString(),
-    };
-  } catch {
-    console.error("Gemini レスポンスのパースに失敗:", text);
-    return getMockTranslation(article);
-  }
+  console.error("Gemini API 最終エラー:", lastError);
+  return getMockTranslation(article);
 }
 
 /** Gemini へのプロンプト */
