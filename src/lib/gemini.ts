@@ -12,8 +12,8 @@
 
 import type { FootnoteItem, NewsArticle, TranslatedArticle, VocabItem } from "@/types";
 
-const GEMINI_MODEL = "gemini-1.5-flash";
-const API_VERSION = "v1"; // 安定版の v1 を使用
+const GEMINI_MODEL = "gemini-2.0-flash";
+const API_VERSION = "v1beta"; // 2.0に対応する v1beta を使用
 const MAX_RETRIES = 5;
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 

@@ -10,8 +10,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
-const GEMINI_MODEL = "gemini-1.5-flash"; 
-const API_VERSION = "v1"; // v1beta ではなく安定版の v1 を使用
+const GEMINI_MODEL = "gemini-2.0-flash"; 
+const API_VERSION = "v1beta"; // 2.0モデルに対応する v1beta を使用
 const MAX_RETRIES = 5;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
