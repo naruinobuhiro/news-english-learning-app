@@ -13,7 +13,7 @@
 import type { FootnoteItem, NewsArticle, TranslatedArticle, VocabItem } from "@/types";
 
 const GEMINI_MODEL = "gemini-2.0-flash";
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 /** 単一ニュース記事を英訳・学習コンテンツ生成 */
@@ -70,7 +70,9 @@ export async function translateArticle(
       lastError = err;
       console.warn(`⚠️ Gemini API リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, err.message);
       retryCount++;
-      await sleep(Math.pow(2, retryCount) * 1000);
+      // 指数関数的バックオフを強化 (15秒, 30秒, ...)
+      const waitTime = Math.pow(2, retryCount) * 7500;
+      await sleep(waitTime);
     }
   }
 

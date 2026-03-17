@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
 const GEMINI_MODEL = "gemini-2.0-flash";
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5; // リトライ回数を少し増やします
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
 async function main() {
@@ -55,7 +55,15 @@ async function main() {
     // 4. 英訳 & コンテンツ生成
     console.log("🔄 Gemini API で英訳・学習コンテンツを生成中...");
     const translatedArticles = [];
-    for (const article of selected) {
+    for (let i = 0; i < selected.length; i++) {
+      const article = selected[i];
+      
+      // 2件目以降は 30秒 待機してレート制限を回避 (無料枠対策)
+      if (i > 0) {
+        console.log(`⏳ 次の記事まで 30秒 待機します... (${i + 1}/${selected.length})`);
+        await sleep(30000);
+      }
+
       let retryCount = 0;
       let translated = null;
       
@@ -68,7 +76,9 @@ async function main() {
         } catch (e) {
           console.warn(`⚠️ 翻訳リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, e.message);
           retryCount++;
-          await sleep(Math.pow(2, retryCount) * 1000);
+          // 指数関数的バックオフ: 15秒, 30秒, 60秒, ...
+          const waitTime = Math.pow(2, retryCount) * 7500;
+          await sleep(waitTime);
         }
       }
 
