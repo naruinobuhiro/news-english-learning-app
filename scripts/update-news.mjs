@@ -10,8 +10,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
-const GEMINI_MODEL = "gemini-2.0-flash";
-const MAX_RETRIES = 5; // リトライ回数を少し増やします
+const GEMINI_MODEL = "gemini-1.5-flash"; // より安定している 1.5-flash でテスト
+const MAX_RETRIES = 5;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
 async function main() {
@@ -50,7 +50,8 @@ async function main() {
     }
 
     // 3. 3件ランダムに選択
-    const selected = allNews.sort(() => Math.random() - 0.5).slice(0, 3);
+    // 3. 疎通確認のため一時的に1件のみにする (通常は3件)
+    const selected = allNews.sort(() => Math.random() - 0.5).slice(0, 1);
 
     // 4. 英訳 & コンテンツ生成
     console.log("🔄 Gemini API で英訳・学習コンテンツを生成中...");
@@ -174,7 +175,11 @@ Please ensure footnotes are useful for high school students and vocabulary cover
     }
   );
   
-  if (!response.ok) throw new Error(`Gemini API Error: ${response.status}`);
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error(`❌ Gemini API Error (${response.status}):`, errorBody);
+    throw new Error(`Gemini API Error: ${response.status}`);
+  }
   const data = await response.json();
   const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
   
