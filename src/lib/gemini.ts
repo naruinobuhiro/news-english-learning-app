@@ -43,8 +43,13 @@ export async function translateArticle(
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.3,
-              responseMimeType: "application/json",
             },
+            safetySettings: [
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+            ],
           }),
         }
       );
@@ -54,8 +59,11 @@ export async function translateArticle(
       }
 
       const data = await response.json();
-      const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-      const parsed = JSON.parse(text);
+      const rawText: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      
+      // JSONを抽出（```json ... ``` のようなマークダウンコードブロックを除去）
+      const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsed = JSON.parse(cleanJson);
 
       return {
         originalTitle: article.title,

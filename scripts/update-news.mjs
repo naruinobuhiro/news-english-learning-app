@@ -29,10 +29,16 @@ async function main() {
     console.log("⏳ 準備のため 60秒 待機します...");
     await sleep(60000);
 
-    // 1. 既存データの読み込み
+    // 1. 既存データの読み込み (破損保護付き)
     let archive = [];
-    if (fs.existsSync(ARCHIVE_PATH)) {
-      archive = JSON.parse(fs.readFileSync(ARCHIVE_PATH, 'utf-8'));
+    try {
+      if (fs.existsSync(ARCHIVE_PATH)) {
+        const content = fs.readFileSync(ARCHIVE_PATH, 'utf-8');
+        archive = content.trim() ? JSON.parse(content) : [];
+      }
+    } catch (e) {
+      console.warn("⚠️ archive.json の読み込みに失敗しました。新規作成します:", e.message);
+      archive = [];
     }
 
     const now = new Date();
@@ -44,9 +50,11 @@ async function main() {
     //   return;
     // }
 
-    // 2. Yahooニュース取得
+    // 2. Yahooニュース取得 (User-Agent付き)
     console.log("📰 Yahooニュースを取得中...");
-    const res = await fetch(RSS_URL);
+    const res = await fetch(RSS_URL, {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" }
+    });
     const xml = await res.text();
     const allNews = parseRSS(xml);
     
@@ -55,46 +63,53 @@ async function main() {
     }
 
     // 3. 3件ランダムに選択
-    // 3. 3件選択 (安定したため3件に戻します)
-    const selected = allNews.sort(() => Math.random() - 0.5).slice(0, 3);
-
-    // 4. 英訳 & コンテンツ生成
+    // 4. 英訳 & コンテンツ生成 (成功保証ロジック)
     console.log("🔄 Gemini API で英訳・学習コンテンツを生成中...");
     const translatedArticles = [];
-    for (let i = 0; i < selected.length; i++) {
-      const article = selected[i];
+    const pool = allNews.sort(() => Math.random() - 0.5); // 候補をシャッフル
+    const TARGET_COUNT = 3;
+
+    for (let i = 0; i < pool.length && translatedArticles.length < TARGET_COUNT; i++) {
+      const article = pool[i];
       
-      // 記事間は 60秒 待機して完璧にレート制限を回避 (無料枠対策)
+      // 2回目以降の試行（成功・失敗問わず）は 60秒 待機
       if (i > 0) {
-        console.log(`⏳ 次の記事まで 60秒 待機します... (${i + 1}/${selected.length})`);
+        console.log(`⏳ 次の候補を試すまで 60秒 待機します... (現在 ${translatedArticles.length}/${TARGET_COUNT} 件成功)`);
         await sleep(60000);
       }
 
+      console.log(`📝 記事「${article.title}」を翻訳中...`);
       let retryCount = 0;
       let translated = null;
       
       while (retryCount < MAX_RETRIES) {
         try {
           translated = await translateArticle(article, apiKey);
-          if (translated && translated.englishTitle && translated.englishBody) {
+          if (validateArticle(translated)) {
             break;
+          } else {
+            console.warn("⚠️ 翻訳結果が不完全です（必須フィールド欠落）。");
+            translated = null; // 失敗扱い
+            break; // この記事は諦めて次の記事へ
           }
         } catch (e) {
           console.warn(`⚠️ 翻訳リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, e.message);
           retryCount++;
-          // 指数関数的バックオフ: 15秒, 30秒, 60秒, ...
-          const waitTime = Math.pow(2, retryCount) * 7500;
+          const waitTime = Math.pow(2, retryCount) * 10000; // 10秒, 20秒, 40秒...
           await sleep(waitTime);
         }
       }
 
       if (translated) {
+        console.log("✅ 翻訳成功！");
         translatedArticles.push(translated);
+      } else {
+        console.warn(`❌ 記事「${article.title}」の翻訳に失敗しました。次の候補を試します。`);
       }
     }
     
     if (translatedArticles.length === 0) {
-      throw new Error("有効な翻訳記事が1つも生成されませんでした。");
+      throw new Error("有効な翻訳記事が1つも生成されませんでした。ニュースソースまたはAPIに致命的な問題があります。");
     }
 
     const dailyNews = {
@@ -145,6 +160,18 @@ function parseRSS(xml) {
   return items;
 }
 
+function validateArticle(a) {
+  if (!a) return false;
+  const required = ["englishTitle", "englishBody", "footnotes", "vocabulary"];
+  for (const field of required) {
+    if (!a[field] || (Array.isArray(a[field]) && a[field].length === 0)) {
+      console.warn(`Missing field or empty array: ${field}`);
+      return false;
+    }
+  }
+  return true;
+}
+
 function extractTag(xml, tag) {
   const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i"));
   return match ? match[1] : null;
@@ -175,7 +202,13 @@ Please ensure footnotes are useful for high school students and vocabulary cover
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, responseMimeType: "application/json" },
+        generationConfig: { temperature: 0.3 },
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ],
       }),
     }
   );
@@ -186,7 +219,11 @@ Please ensure footnotes are useful for high school students and vocabulary cover
     throw new Error(`Gemini API Error: ${response.status}`);
   }
   const data = await response.json();
-  const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+  const rawText = data.candidates[0].content.parts[0].text;
+  
+  // JSONを抽出（```json ... ``` のようなマークダウンコードブロックを除去）
+  const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+  const parsed = JSON.parse(cleanJson);
   
   return {
     originalTitle: article.title,
