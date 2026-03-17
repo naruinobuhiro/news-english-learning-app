@@ -10,7 +10,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
-const GEMINI_MODEL = "gemini-1.5-flash"; // より安定している 1.5-flash でテスト
+const GEMINI_MODEL = "gemini-1.5-flash"; 
+const API_VERSION = "v1"; // v1beta ではなく安定版の v1 を使用
 const MAX_RETRIES = 5;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
@@ -24,6 +25,10 @@ async function main() {
   }
 
   try {
+    // 0. 開始前に60秒待機 (GitHub Actions の共用IPによるレート制限を落ち着かせるための「暖気」)
+    console.log("⏳ 準備のため 60秒 待機します...");
+    await sleep(60000);
+
     // 1. 既存データの読み込み
     let archive = [];
     if (fs.existsSync(ARCHIVE_PATH)) {
@@ -50,8 +55,8 @@ async function main() {
     }
 
     // 3. 3件ランダムに選択
-    // 3. 疎通確認のため一時的に1件のみにする (通常は3件)
-    const selected = allNews.sort(() => Math.random() - 0.5).slice(0, 1);
+    // 3. 3件選択 (安定したため3件に戻します)
+    const selected = allNews.sort(() => Math.random() - 0.5).slice(0, 3);
 
     // 4. 英訳 & コンテンツ生成
     console.log("🔄 Gemini API で英訳・学習コンテンツを生成中...");
@@ -59,10 +64,10 @@ async function main() {
     for (let i = 0; i < selected.length; i++) {
       const article = selected[i];
       
-      // 2件目以降は 30秒 待機してレート制限を回避 (無料枠対策)
+      // 記事間は 60秒 待機して完璧にレート制限を回避 (無料枠対策)
       if (i > 0) {
-        console.log(`⏳ 次の記事まで 30秒 待機します... (${i + 1}/${selected.length})`);
-        await sleep(30000);
+        console.log(`⏳ 次の記事まで 60秒 待機します... (${i + 1}/${selected.length})`);
+        await sleep(60000);
       }
 
       let retryCount = 0;
@@ -164,7 +169,7 @@ async function translateArticle(article, apiKey) {
 Please ensure footnotes are useful for high school students and vocabulary covers levels from Eiken 2 to Pre-1.`;
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/${API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

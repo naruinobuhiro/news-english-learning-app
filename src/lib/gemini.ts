@@ -12,7 +12,8 @@
 
 import type { FootnoteItem, NewsArticle, TranslatedArticle, VocabItem } from "@/types";
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-1.5-flash";
+const API_VERSION = "v1"; // 安定版の v1 を使用
 const MAX_RETRIES = 5;
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -34,7 +35,7 @@ export async function translateArticle(
   while (retryCount < MAX_RETRIES) {
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/${API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
