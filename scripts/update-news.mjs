@@ -10,8 +10,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
-const GEMINI_MODEL = "gemini-2.0-flash"; 
-const API_VERSION = "v1beta"; // 2.0モデルに対応する v1beta を使用
+const GEMINI_MODEL = "gemini-1.5-flash"; 
+const API_VERSION = "v1beta"; 
 const MAX_RETRIES = 5;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
@@ -95,7 +95,11 @@ async function main() {
         } catch (e) {
           console.warn(`⚠️ 翻訳リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, e.message);
           retryCount++;
-          const waitTime = Math.pow(2, retryCount) * 10000; // 10秒, 20秒, 40秒...
+          // 429 エラー（クォータ制限）の場合は、最低でも60秒待機
+          const isQuotaError = e.message.includes("429");
+          const waitTime = isQuotaError 
+            ? Math.max(60000, Math.pow(2, retryCount) * 15000)
+            : Math.pow(2, retryCount) * 10000;
           await sleep(waitTime);
         }
       }

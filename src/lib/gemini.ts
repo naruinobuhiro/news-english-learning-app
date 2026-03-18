@@ -12,8 +12,8 @@
 
 import type { FootnoteItem, NewsArticle, TranslatedArticle, VocabItem } from "@/types";
 
-const GEMINI_MODEL = "gemini-2.0-flash";
-const API_VERSION = "v1beta"; // 2.0に対応する v1beta を使用
+const GEMINI_MODEL = "gemini-1.5-flash";
+const API_VERSION = "v1beta"; 
 const MAX_RETRIES = 5;
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -79,8 +79,11 @@ export async function translateArticle(
       lastError = err;
       console.warn(`⚠️ Gemini API リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, err.message);
       retryCount++;
-      // 指数関数的バックオフを強化 (15秒, 30秒, ...)
-      const waitTime = Math.pow(2, retryCount) * 7500;
+      // 429エラー時は特に長く待機
+      const isQuotaError = err.message.includes("429");
+      const waitTime = isQuotaError 
+        ? Math.max(60000, Math.pow(2, retryCount) * 15000)
+        : Math.pow(2, retryCount) * 10000;
       await sleep(waitTime);
     }
   }
