@@ -10,8 +10,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
-const GEMINI_MODEL = "gemini-1.5-flash"; 
-const API_VERSION = "v1beta"; 
+const GEMINI_MODEL = "gemini-2.0-flash-lite"; 
+const API_VERSION = "v1"; 
 const MAX_RETRIES = 5;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
@@ -98,8 +98,9 @@ async function main() {
           // 429 エラー（クォータ制限）の場合は、最低でも60秒待機
           const isQuotaError = e.message.includes("429");
           const waitTime = isQuotaError 
-            ? Math.max(60000, Math.pow(2, retryCount) * 15000)
+            ? Math.max(60000, Math.pow(2, retryCount) * 20000)
             : Math.pow(2, retryCount) * 10000;
+          console.warn(`⏳ 制限解除（または再試行）まで ${waitTime/1000} 秒待機します...`);
           await sleep(waitTime);
         }
       }
@@ -190,13 +191,14 @@ async function translateArticle(article, apiKey) {
 タイトル: ${article.title}
 本文: ${article.description}
 
-出力形式（必ずJSONのみを返すこと）:
+出力形式（必ずJSONのみを返し、前後に説明文を入れないこと）:
 {
   "englishTitle": "...",
   "englishBody": "English text with paragraphs separated by \\n\\n",
   "footnotes": [{"expression": "...", "meaning": "...", "usage": "..."}],
   "vocabulary": [{"word": "...", "meaning": "...", "example": "...", "level": "..."}]
 }
+重要：JSON以外のテキスト（「承知しました」「こちらが翻訳です」など）は一切出力しないでください。JSON構文のみを出力してください。
 Please ensure footnotes are useful for high school students and vocabulary covers levels from Eiken 2 to Pre-1.`;
 
   const response = await fetch(
@@ -226,8 +228,14 @@ Please ensure footnotes are useful for high school students and vocabulary cover
   const rawText = data.candidates[0].content.parts[0].text;
   
   // JSONを抽出（```json ... ``` のようなマークダウンコードブロックを除去）
-  const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-  const parsed = JSON.parse(cleanJson);
+  let parsed = null;
+  try {
+    const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+    parsed = JSON.parse(cleanJson);
+  } catch (e) {
+    console.error("❌ JSONパースエラー。AIの生成結果:", rawText);
+    throw new Error("AIの回答をJSONとして解析できませんでした。");
+  }
   
   return {
     originalTitle: article.title,

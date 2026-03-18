@@ -12,8 +12,8 @@
 
 import type { FootnoteItem, NewsArticle, TranslatedArticle, VocabItem } from "@/types";
 
-const GEMINI_MODEL = "gemini-1.5-flash";
-const API_VERSION = "v1beta"; 
+const GEMINI_MODEL = "gemini-2.0-flash-lite";
+const API_VERSION = "v1"; 
 const MAX_RETRIES = 5;
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -62,8 +62,14 @@ export async function translateArticle(
       const rawText: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
       
       // JSONを抽出（```json ... ``` のようなマークダウンコードブロックを除去）
-      const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleanJson);
+      let parsed = null;
+      try {
+        const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        parsed = JSON.parse(cleanJson);
+      } catch (e) {
+        console.error("❌ JSONパースエラー。AIの生成結果:", rawText);
+        throw new Error("AIの回答をJSONとして解析できませんでした。");
+      }
 
       return {
         originalTitle: article.title,
@@ -107,7 +113,7 @@ function buildPrompt(article: NewsArticle): string {
 タイトル: ${article.title}
 本文: ${article.description}
 
-## 出力形式（必ずJSONのみを返すこと）
+## 出力形式（必ずJSONのみを返し、前後に説明文を入れないこと）
 {
   "englishTitle": "英語タイトル",
   "englishBody": "英語本文（段落を\\n\\nで区切る）",
