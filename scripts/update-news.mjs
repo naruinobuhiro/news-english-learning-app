@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
 const GEMINI_MODEL = "gemini-2.0-flash-lite"; 
-const API_VERSION = "v1"; 
+const API_VERSION = "v1beta"; 
 const MAX_RETRIES = 5;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
