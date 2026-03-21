@@ -44,11 +44,12 @@ async function main() {
     const now = new Date();
     const jstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000));
     const today = jstDate.toISOString().slice(0, 10);
-    // すでに今日分があればスキップ（デバッグ時はコメントアウト）
-    // if (archive.some(d => d.date === today)) {
-    //   console.log(`✅ ${today} のデータは既に存在します。スキップします。`);
-    //   return;
-    // }
+    
+    // すでに今日分があればスキップ（手動再実行時の重複防止）
+    if (archive.some(d => d.date === today)) {
+      console.log(`✅ ${today} のデータは既に存在します。処理を終了します。`);
+      return;
+    }
 
     // 2. Yahooニュース取得 (User-Agent付き)
     console.log("📰 Yahooニュースを取得中...");
@@ -88,19 +89,26 @@ async function main() {
           if (validateArticle(translated)) {
             break;
           } else {
-            console.warn("⚠️ 翻訳結果が不完全です（必須フィールド欠落）。");
-            translated = null; // 失敗扱い
-            break; // この記事は諦めて次の記事へ
+            console.warn("⚠️ 翻訳結果が不完全です（必須フィールド欠落）。次の候補を試します。");
+            translated = null;
+            break; // バリデーション失敗はリトライしても解決しないため即時 break
           }
         } catch (e) {
+          // セーフティ拒絶などの「回復不能なエラー」は即座に諦める
+          if (e.message.includes("拒否されました") || e.message.includes("HTTP Error (400)")) {
+            console.error(`❌ 回復不能なエラーのためこの記事をスキップします: ${e.message}`);
+            translated = null;
+            break;
+          }
+
           console.warn(`⚠️ 翻訳リトライ中 (${retryCount + 1}/${MAX_RETRIES}):`, e.message);
           retryCount++;
           // 429 エラー（クォータ制限）の場合は、最低でも60秒待機
           const isQuotaError = e.message.includes("429");
           const waitTime = isQuotaError 
-            ? Math.max(60000, Math.pow(2, retryCount) * 20000)
+            ? Math.max(60 * 1000, Math.pow(2, retryCount) * 20000)
             : Math.pow(2, retryCount) * 10000;
-          console.warn(`⏳ 制限解除（または再試行）まで ${waitTime/1000} 秒待機します...`);
+          console.warn(`⏳ 再試行まで ${waitTime/1000} 秒待機します...`);
           await sleep(waitTime);
         }
       }
@@ -186,20 +194,37 @@ function stripHTML(s) { return s.replace(/<[^>]+>/g, "").replace(/&[a-z]+;/g, " 
 
 async function translateArticle(article, apiKey) {
   const prompt = `あなたは日本の大学受験英語の専門家です。
-以下の日本語ニュースを、高校3年生（英検2級〜準1級レベル）向けの英語に翻訳してください。
+以下の日本語ニュースを、高校3年生（英検2級〜準1級レベル）向けの英語に翻訳し、指定されたJSONフォーマットで出力してください。
 
 タイトル: ${article.title}
 本文: ${article.description}
 
-出力形式（必ずJSONのみを返し、前後に説明文を入れないこと）:
+## 出力JSONスキーマ:
 {
-  "englishTitle": "...",
-  "englishBody": "English text with paragraphs separated by \\n\\n",
-  "footnotes": [{"expression": "...", "meaning": "...", "usage": "..."}],
-  "vocabulary": [{"word": "...", "meaning": "...", "example": "...", "level": "..."}]
+  "englishTitle": "記事の英語タイトル",
+  "englishBody": "英語本文（段落は \\n\\n で区切る）",
+  "footnotes": [
+    {
+      "expression": "受験頻出の英語表現（イディオム、構文など）",
+      "meaning": "日本語の意味",
+      "usage": "使い方のヒント"
+    }
+  ],
+  "vocabulary": [
+    {
+      "word": "重要英単語",
+      "meaning": "日本語訳",
+      "example": "本文に基づいた短い例文",
+      "level": "英検2級 or 英検準1級"
+    }
+  ]
 }
-重要：JSON以外のテキスト（「承知しました」「こちらが翻訳です」など）は一切出力しないでください。JSON構文のみを出力してください。
-Please ensure footnotes are useful for high school students and vocabulary covers levels from Eiken 2 to Pre-1.`;
+
+重要：
+- 脚注 (footnotes) は3〜5個含めてください。
+- 語彙 (vocabulary) は5〜8個含めてください。
+- レベル感は大学入試を意識してください。
+- 返答は純粋なJSONのみとし、解説文などは一切含めないでください。`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/${API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
@@ -208,7 +233,10 @@ Please ensure footnotes are useful for high school students and vocabulary cover
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3 },
+        generationConfig: { 
+          temperature: 0.3,
+          response_mime_type: "application/json"
+        },
         safetySettings: [
           { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
           { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -221,20 +249,30 @@ Please ensure footnotes are useful for high school students and vocabulary cover
   
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error(`❌ Gemini API Error (${response.status}):`, errorBody);
-    throw new Error(`Gemini API Error: ${response.status}`);
+    console.error(`❌ Gemini API HTTP Error (${response.status}):`, errorBody);
+    throw new Error(`Gemini API HTTP Error: ${response.status}`);
   }
+
   const data = await response.json();
-  const rawText = data.candidates[0].content.parts[0].text;
+  const candidate = data.candidates?.[0];
+
+  if (!candidate || candidate.finishReason !== "STOP") {
+    console.error(`❌ AIの生成が正常に終了しませんでした。理由: ${candidate?.finishReason || "不明"}`);
+    if (candidate?.safetyRatings) {
+      console.error("安全性の判定状況:", JSON.stringify(candidate.safetyRatings));
+    }
+    throw new Error("AIの生成が未完了または拒否されました。");
+  }
+
+  const rawText = candidate.content.parts[0].text;
   
-  // JSONを抽出（```json ... ``` のようなマークダウンコードブロックを除去）
   let parsed = null;
   try {
-    const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-    parsed = JSON.parse(cleanJson);
+    // JSONモードなので基本的にはそのままパース可能だが、念のため前後の空白を除去
+    parsed = JSON.parse(rawText.trim());
   } catch (e) {
     console.error("❌ JSONパースエラー。AIの生成結果:", rawText);
-    throw new Error("AIの回答をJSONとして解析できませんでした。");
+    throw new Error("AIの生成したJSONが不正な形式です。");
   }
   
   return {
