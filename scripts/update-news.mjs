@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARCHIVE_PATH = path.join(__dirname, '../public/data/archive.json');
 const RSS_URL = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
-const GEMINI_MODEL = "gemini-2.0-flash-lite"; 
+const GEMINI_MODEL = "gemini-2.0-flash"; 
 const API_VERSION = "v1beta"; 
 const MAX_RETRIES = 5;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
@@ -68,7 +68,7 @@ async function main() {
     console.log("🔄 Gemini API で英訳・学習コンテンツを生成中...");
     const translatedArticles = [];
     const pool = allNews.sort(() => Math.random() - 0.5); // 候補をシャッフル
-    const TARGET_COUNT = 3;
+    const TARGET_COUNT = 1;
 
     for (let i = 0; i < pool.length && translatedArticles.length < TARGET_COUNT; i++) {
       const article = pool[i];
@@ -235,7 +235,7 @@ async function translateArticle(article, apiKey) {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { 
           temperature: 0.3,
-          response_mime_type: "application/json"
+          responseMimeType: "application/json"
         },
         safetySettings: [
           { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -268,8 +268,12 @@ async function translateArticle(article, apiKey) {
   
   let parsed = null;
   try {
-    // JSONモードなので基本的にはそのままパース可能だが、念のため前後の空白を除去
-    parsed = JSON.parse(rawText.trim());
+    // JSONモードが効かない場合や、AIが勝手にマークダウンを含める場合への対策
+    const cleanedText = rawText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+    parsed = JSON.parse(cleanedText);
   } catch (e) {
     console.error("❌ JSONパースエラー。AIの生成結果:", rawText);
     throw new Error("AIの生成したJSONが不正な形式です。");
