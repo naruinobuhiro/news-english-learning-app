@@ -1,5 +1,41 @@
 [
   {
+    "id": "2026-03-27_7b3d2620",
+    "title": "自民 党大会に連合会長を招待せず",
+    "link": "https://news.yahoo.co.jp/pickup/6574324?source=rss",
+    "description": "",
+    "pubDate": "Thu, 26 Mar 2026 13:39:55 GMT",
+    "fetchedAt": "2026-03-26T23:01:05.213Z",
+    "date": "2026-03-27",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-27_213b2ff8",
+    "title": "イラン発電所攻撃再延期 米大統領",
+    "link": "https://news.yahoo.co.jp/pickup/6574340?source=rss",
+    "description": "",
+    "pubDate": "Thu, 26 Mar 2026 22:38:34 GMT",
+    "fetchedAt": "2026-03-26T23:01:05.213Z",
+    "date": "2026-03-27",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-27_d5161612",
+    "title": "筑波大生不明で終身刑判決 仏",
+    "link": "https://news.yahoo.co.jp/pickup/6574322?source=rss",
+    "description": "",
+    "pubDate": "Thu, 26 Mar 2026 13:12:46 GMT",
+    "fetchedAt": "2026-03-26T23:01:05.213Z",
+    "date": "2026-03-27",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
     "id": "2026-03-26_42457165",
     "title": "暫定予算案 3/30に成立の見通し",
     "link": "https://news.yahoo.co.jp/pickup/6574309?source=rss",
@@ -7,8 +43,8 @@
     "pubDate": "Thu, 26 Mar 2026 10:11:26 GMT",
     "fetchedAt": "2026-03-26T13:16:11.046Z",
     "date": "2026-03-26",
-    "status": "pending",
-    "retryCount": 0,
+    "status": "failed",
+    "retryCount": 1,
     "translation": null
   },
   {
@@ -19,8 +55,8 @@
     "pubDate": "Thu, 26 Mar 2026 12:26:50 GMT",
     "fetchedAt": "2026-03-26T13:16:11.046Z",
     "date": "2026-03-26",
-    "status": "pending",
-    "retryCount": 0,
+    "status": "failed",
+    "retryCount": 1,
     "translation": null
   },
   {
@@ -31,8 +67,8 @@
     "pubDate": "Thu, 26 Mar 2026 12:47:47 GMT",
     "fetchedAt": "2026-03-26T13:16:11.046Z",
     "date": "2026-03-26",
-    "status": "pending",
-    "retryCount": 0,
+    "status": "failed",
+    "retryCount": 1,
     "translation": null
   }
 ]
