@@ -30,20 +30,22 @@ jobs:
           
       - name: Install dependencies
         run: npm install
-        
-      - name: Update News Data
-        run: npm run update-news
+
+      # Phase 1: ニュース取得（API不使用・RSSのみ）
+      - name: Fetch News (RSS only)
+        run: node scripts/fetch-news.mjs
+
+      # Phase 2: 翻訳（Gemini API・1件ずつ5秒間隔）
+      - name: Translate News (Gemini API)
+        run: node scripts/translate-news.mjs
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
-          GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
-          GOOGLE_SHEETS_SPREADSHEET_ID: ${{ secrets.GOOGLE_SHEETS_SPREADSHEET_ID }}
-          
+
       - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/archive.json
+          git add public/data/archive.json public/data/raw-news.json
           git commit -m "chore: auto update news" || echo "No changes to commit"
           git push
 

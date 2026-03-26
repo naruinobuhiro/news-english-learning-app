@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "update-news": "node scripts/update-news.mjs"
+    "fetch-news": "node scripts/fetch-news.mjs",
+    "translate-news": "node scripts/translate-news.mjs",
+    "update-news": "node scripts/fetch-news.mjs && node scripts/translate-news.mjs"
   },
   "dependencies": {
     "next": "15.2.3",
