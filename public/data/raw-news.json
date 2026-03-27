@@ -1,5 +1,41 @@
 [
   {
+    "id": "2026-03-28_6b8b6ef9",
+    "title": "首相 予算案の年度内成立を断念",
+    "link": "https://news.yahoo.co.jp/pickup/6574433?source=rss",
+    "description": "",
+    "pubDate": "Fri, 27 Mar 2026 22:54:14 GMT",
+    "fetchedAt": "2026-03-27T23:47:17.112Z",
+    "date": "2026-03-28",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-28_e398b941",
+    "title": "フジ宮司愛海アナ 海外留学を発表",
+    "link": "https://news.yahoo.co.jp/pickup/6574426?source=rss",
+    "description": "",
+    "pubDate": "Fri, 27 Mar 2026 22:25:33 GMT",
+    "fetchedAt": "2026-03-27T23:47:17.112Z",
+    "date": "2026-03-28",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-28_3d4ac7d2",
+    "title": "黒田氏 利上げ1.5%まで問題ない",
+    "link": "https://news.yahoo.co.jp/pickup/6574425?source=rss",
+    "description": "",
+    "pubDate": "Fri, 27 Mar 2026 22:17:39 GMT",
+    "fetchedAt": "2026-03-27T23:47:17.112Z",
+    "date": "2026-03-28",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
     "id": "2026-03-27_7b3d2620",
     "title": "自民 党大会に連合会長を招待せず",
     "link": "https://news.yahoo.co.jp/pickup/6574324?source=rss",
