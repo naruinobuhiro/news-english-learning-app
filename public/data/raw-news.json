@@ -1,5 +1,41 @@
 [
   {
+    "id": "2026-03-29_65f63944",
+    "title": "米とイラン 戦闘終結へ駆け引き",
+    "link": "https://news.yahoo.co.jp/pickup/6574520?source=rss",
+    "description": "",
+    "pubDate": "Sat, 28 Mar 2026 22:48:53 GMT",
+    "fetchedAt": "2026-03-28T23:02:44.694Z",
+    "date": "2026-03-29",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-29_4e3362fc",
+    "title": "インドネシア 16歳未満のSNS規制",
+    "link": "https://news.yahoo.co.jp/pickup/6574463?source=rss",
+    "description": "",
+    "pubDate": "Sat, 28 Mar 2026 05:13:42 GMT",
+    "fetchedAt": "2026-03-28T23:02:44.694Z",
+    "date": "2026-03-29",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-29_d2cc1f95",
+    "title": "森保J勝利 伊東純也が決勝ゴール",
+    "link": "https://news.yahoo.co.jp/pickup/6574521?source=rss",
+    "description": "",
+    "pubDate": "Sat, 28 Mar 2026 22:43:18 GMT",
+    "fetchedAt": "2026-03-28T23:02:44.694Z",
+    "date": "2026-03-29",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
     "id": "2026-03-28_6b8b6ef9",
     "title": "首相 予算案の年度内成立を断念",
     "link": "https://news.yahoo.co.jp/pickup/6574433?source=rss",
