@@ -1,5 +1,41 @@
 [
   {
+    "id": "2026-03-31_f50279e7",
+    "title": "吉岡里帆どんぎつね 4年ぶり復活",
+    "link": "https://news.yahoo.co.jp/pickup/6574704?source=rss",
+    "description": "",
+    "pubDate": "Mon, 30 Mar 2026 21:04:02 GMT",
+    "fetchedAt": "2026-03-30T23:53:51.144Z",
+    "date": "2026-03-31",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-31_286370c4",
+    "title": "NPB ピッチクロック導入再検討へ",
+    "link": "https://news.yahoo.co.jp/pickup/6574709?source=rss",
+    "description": "",
+    "pubDate": "Mon, 30 Mar 2026 21:59:44 GMT",
+    "fetchedAt": "2026-03-30T23:53:51.144Z",
+    "date": "2026-03-31",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-03-31_b063ad15",
+    "title": "米大統領 硬軟発信イラン揺さぶり",
+    "link": "https://news.yahoo.co.jp/pickup/6574712?source=rss",
+    "description": "",
+    "pubDate": "Mon, 30 Mar 2026 22:55:40 GMT",
+    "fetchedAt": "2026-03-30T23:53:51.144Z",
+    "date": "2026-03-31",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
     "id": "2026-03-30_a6b3a0d2",
     "title": "11年ぶり暫定予算 午後成立へ",
     "link": "https://news.yahoo.co.jp/pickup/6574602?source=rss",
