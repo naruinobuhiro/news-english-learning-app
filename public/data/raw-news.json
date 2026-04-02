@@ -1,5 +1,41 @@
 [
   {
+    "id": "2026-04-03_450e8d49",
+    "title": "内田有紀と結婚 柏原崇氏とは",
+    "link": "https://news.yahoo.co.jp/pickup/6575005?source=rss",
+    "description": "",
+    "pubDate": "Thu, 02 Apr 2026 22:44:43 GMT",
+    "fetchedAt": "2026-04-02T23:05:53.568Z",
+    "date": "2026-04-03",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-04-03_1791105a",
+    "title": "車とトラックが衝突 5人を搬送",
+    "link": "https://news.yahoo.co.jp/pickup/6575000?source=rss",
+    "description": "",
+    "pubDate": "Thu, 02 Apr 2026 21:44:12 GMT",
+    "fetchedAt": "2026-04-02T23:05:53.568Z",
+    "date": "2026-04-03",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-04-03_27427619",
+    "title": "トランプ氏 ボンディ司法長官解任",
+    "link": "https://news.yahoo.co.jp/pickup/6574999?source=rss",
+    "description": "",
+    "pubDate": "Thu, 02 Apr 2026 21:29:33 GMT",
+    "fetchedAt": "2026-04-02T23:05:53.568Z",
+    "date": "2026-04-03",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
     "id": "2026-04-02_840c135c",
     "title": "半世紀ぶり有人月周回へ 打ち上げ",
     "link": "https://news.yahoo.co.jp/pickup/6574906?source=rss",
