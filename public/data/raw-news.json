@@ -1,5 +1,41 @@
 [
   {
+    "id": "2026-04-04_cde610e4",
+    "title": "原油不足の影響拡大 農家は悲鳴",
+    "link": "https://news.yahoo.co.jp/pickup/6575111?source=rss",
+    "description": "",
+    "pubDate": "Fri, 03 Apr 2026 22:36:50 GMT",
+    "fetchedAt": "2026-04-03T23:50:31.503Z",
+    "date": "2026-04-04",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-04-04_f2071020",
+    "title": "りくりゅう進退 もう少し考えたい",
+    "link": "https://news.yahoo.co.jp/pickup/6575109?source=rss",
+    "description": "",
+    "pubDate": "Fri, 03 Apr 2026 22:32:22 GMT",
+    "fetchedAt": "2026-04-03T23:50:31.503Z",
+    "date": "2026-04-04",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-04-04_911a06b5",
+    "title": "米が48時間停戦提案か イラン拒否",
+    "link": "https://news.yahoo.co.jp/pickup/6575112?source=rss",
+    "description": "",
+    "pubDate": "Fri, 03 Apr 2026 22:39:07 GMT",
+    "fetchedAt": "2026-04-03T23:50:31.503Z",
+    "date": "2026-04-04",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
     "id": "2026-04-03_450e8d49",
     "title": "内田有紀と結婚 柏原崇氏とは",
     "link": "https://news.yahoo.co.jp/pickup/6575005?source=rss",
