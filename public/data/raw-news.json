@@ -1,5 +1,41 @@
 [
   {
+    "id": "2026-04-05_816c60ab",
+    "title": "中国の大学 外国語専攻廃止相次ぐ",
+    "link": "https://news.yahoo.co.jp/pickup/6575213?source=rss",
+    "description": "",
+    "pubDate": "Sat, 04 Apr 2026 14:31:21 GMT",
+    "fetchedAt": "2026-04-04T23:02:53.135Z",
+    "date": "2026-04-05",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-04-05_b2a81075",
+    "title": "西野七瀬 結婚後も自分の時間確保",
+    "link": "https://news.yahoo.co.jp/pickup/6575220?source=rss",
+    "description": "",
+    "pubDate": "Sat, 04 Apr 2026 22:32:07 GMT",
+    "fetchedAt": "2026-04-04T23:02:53.135Z",
+    "date": "2026-04-05",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
+    "id": "2026-04-05_d78bfb3a",
+    "title": "TBS感謝祭 島崎和歌子の説教話題",
+    "link": "https://news.yahoo.co.jp/pickup/6575217?source=rss",
+    "description": "",
+    "pubDate": "Sat, 04 Apr 2026 22:19:12 GMT",
+    "fetchedAt": "2026-04-04T23:02:53.135Z",
+    "date": "2026-04-05",
+    "status": "failed",
+    "retryCount": 1,
+    "translation": null
+  },
+  {
     "id": "2026-04-04_cde610e4",
     "title": "原油不足の影響拡大 農家は悲鳴",
     "link": "https://news.yahoo.co.jp/pickup/6575111?source=rss",
@@ -319,42 +355,6 @@
     "pubDate": "Thu, 26 Mar 2026 13:12:46 GMT",
     "fetchedAt": "2026-03-26T23:01:05.213Z",
     "date": "2026-03-27",
-    "status": "failed",
-    "retryCount": 1,
-    "translation": null
-  },
-  {
-    "id": "2026-03-26_42457165",
-    "title": "暫定予算案 3/30に成立の見通し",
-    "link": "https://news.yahoo.co.jp/pickup/6574309?source=rss",
-    "description": "",
-    "pubDate": "Thu, 26 Mar 2026 10:11:26 GMT",
-    "fetchedAt": "2026-03-26T13:16:11.046Z",
-    "date": "2026-03-26",
-    "status": "failed",
-    "retryCount": 1,
-    "translation": null
-  },
-  {
-    "id": "2026-03-26_e3207e85",
-    "title": "衝撃 杉野遥亮が丸刈り姿で登場",
-    "link": "https://news.yahoo.co.jp/pickup/6574320?source=rss",
-    "description": "",
-    "pubDate": "Thu, 26 Mar 2026 12:26:50 GMT",
-    "fetchedAt": "2026-03-26T13:16:11.046Z",
-    "date": "2026-03-26",
-    "status": "failed",
-    "retryCount": 1,
-    "translation": null
-  },
-  {
-    "id": "2026-03-26_84dddad9",
-    "title": "中日鵜飼 OP戦3本塁打も開幕2軍",
-    "link": "https://news.yahoo.co.jp/pickup/6574321?source=rss",
-    "description": "",
-    "pubDate": "Thu, 26 Mar 2026 12:47:47 GMT",
-    "fetchedAt": "2026-03-26T13:16:11.046Z",
-    "date": "2026-03-26",
     "status": "failed",
     "retryCount": 1,
     "translation": null
